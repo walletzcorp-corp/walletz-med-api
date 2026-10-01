@@ -1,0 +1,73 @@
+// Convenção: camelCase no Prisma Client, snake_case no Postgres via @map/@@map.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum TenantStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum OrgStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum TaxProfile {
+  SIMPLES_NACIONAL
+  LUCRO_PRESUMIDO
+  LUCRO_REAL
+  MEI
+}
+
+// ---------------------------------------------------------------------------
+// Tenant
+// tenant_key: gerado como hex de 32 bytes — imprevisível e não reutilizável.
+// Histórico nunca é apagado; status registra o ciclo de vida.
+// ---------------------------------------------------------------------------
+
+model Tenant {
+  id        String       @id @default(uuid()) @map("tenant_id")
+  key       String       @unique @map("tenant_key")
+  status    TenantStatus @default(ACTIVE)
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  organization Organization?
+
+  @@map("tenant")
+}
+
+// ---------------------------------------------------------------------------
+// Organization
+// Criada sempre junto com o Tenant (transação única).
+// row_version: controle de concorrência optimista.
+// ---------------------------------------------------------------------------
+
+model Organization {
+  id               String     @id @default(uuid()) @map("organization_id")
+  tenantId         String     @unique @map("tenant_id")
+  legalName        String     @map("legal_name")
+  tradeName        String     @map("trade_name")
+  cnpjDigits       String     @map("cnpj_digits") // 14 dígitos numéricos, sem formatação
+  taxProfile       TaxProfile @map("tax_profile")
+  regionalConfigId String     @map("regional_config_id")
+  status           OrgStatus  @default(ACTIVE)
+  rowVersion       Int        @default(1) @map("row_version")
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("organization")
+}
