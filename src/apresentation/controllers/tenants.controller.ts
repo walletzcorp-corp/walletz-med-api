@@ -70,7 +70,7 @@ export class TenantsController {
   }
 
   @ApiOperation({
-    summary: 'Obter detalhes de um Tenant específico',
+    summary: 'Obter detalhes de Tenant específico',
     description:
       'Retorna os detalhes de um tenant específico, incluindo sua organização associada.',
   })
