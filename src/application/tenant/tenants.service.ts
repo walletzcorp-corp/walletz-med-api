@@ -5,8 +5,8 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Tenant } from '../../entities/tenant.entity';
-import { Organization } from '../../entities/organization.entity';
+import { TenantEntity } from '../../entities/tenant.entity';
+import { OrganizationEntity } from '../../entities/organization.entity';
 import {
   CreateTenantDto,
   UpdateOrganizationDto,
@@ -18,33 +18,20 @@ export class TenantsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateTenantDto) {
-    const tenant = Tenant.create();
-    const organization = Organization.create({ tenantId: tenant.id, ...dto });
+    const tenant = TenantEntity.create();
 
-    const tenantRow = {
-      id: tenant.id,
-      key: tenant.key,
-      status: tenant.status,
-      createdAt: tenant.createdAt,
-    };
-
-    const orgRow = {
-      id: organization.id,
-      tenantId: organization.tenantId,
-      legalName: organization.legalName,
-      tradeName: organization.tradeName,
-      cnpjDigits: organization.cnpjDigits,
-      taxProfile: organization.taxProfile,
-      regionalConfigId: organization.regionalConfigId,
-      status: organization.status,
-      rowVersion: organization.rowVersion,
-      createdAt: organization.createdAt,
-      updatedAt: organization.updatedAt,
-    };
+    const organization = OrganizationEntity.createIsValid({
+      tenantId: tenant.id,
+      legalName: dto.legalName,
+      tradeName: dto.tradeName,
+      cnpjDigits: dto.cnpjDigits,
+      taxProfile: dto.taxProfile,
+      regionalConfigId: dto.regionalConfigId,
+    });
 
     await this.prisma.$transaction([
-      this.prisma.tenant.create({ data: tenantRow }),
-      this.prisma.organization.create({ data: orgRow }),
+      this.prisma.tenant.create({ data: tenant }),
+      this.prisma.organization.create({ data: organization }),
     ]);
 
     return { tenant, organization };
@@ -54,13 +41,7 @@ export class TenantsService {
     const rows = await this.prisma.tenant.findMany({
       orderBy: { createdAt: 'desc' },
     });
-    return rows.map((row) =>
-      Tenant.restore(row.id, {
-        key: row.key,
-        status: row.status as any,
-        createdAt: row.createdAt,
-      }),
-    );
+    return rows.map((row) => TenantEntity.restore(row));
   }
 
   async findOne(id: string) {
@@ -71,25 +52,10 @@ export class TenantsService {
 
     if (!row) throw new NotFoundException('Tenant não encontrado.');
 
-    const tenant = Tenant.restore(row.id, {
-      key: row.key,
-      status: row.status as any,
-      createdAt: row.createdAt,
-    });
+    const tenant = TenantEntity.restore(row);
 
     const organization = row.organization
-      ? Organization.restore(row.organization.id, {
-          tenantId: row.organization.tenantId,
-          legalName: row.organization.legalName,
-          tradeName: row.organization.tradeName,
-          cnpjDigits: row.organization.cnpjDigits,
-          taxProfile: row.organization.taxProfile as any,
-          regionalConfigId: row.organization.regionalConfigId,
-          status: row.organization.status as any,
-          rowVersion: row.organization.rowVersion,
-          createdAt: row.organization.createdAt,
-          updatedAt: row.organization.updatedAt,
-        })
+      ? OrganizationEntity.restore(row.organization)
       : null;
 
     return { tenant, organization };
@@ -99,11 +65,7 @@ export class TenantsService {
     const row = await this.prisma.tenant.findUnique({ where: { id } });
     if (!row) throw new NotFoundException('Tenant não encontrado.');
 
-    const tenant = Tenant.restore(row.id, {
-      key: row.key,
-      status: row.status as any,
-      createdAt: row.createdAt,
-    });
+    const tenant = TenantEntity.restore(row);
 
     switch (dto.status) {
       case 'ACTIVE':
@@ -136,18 +98,7 @@ export class TenantsService {
         'Organização não encontrada para este tenant.',
       );
 
-    const organization = Organization.restore(orgRow.id, {
-      tenantId: orgRow.tenantId,
-      legalName: orgRow.legalName,
-      tradeName: orgRow.tradeName,
-      cnpjDigits: orgRow.cnpjDigits,
-      taxProfile: orgRow.taxProfile as any,
-      regionalConfigId: orgRow.regionalConfigId,
-      status: orgRow.status as any,
-      rowVersion: orgRow.rowVersion,
-      createdAt: orgRow.createdAt,
-      updatedAt: orgRow.updatedAt,
-    });
+    const organization = OrganizationEntity.restore(orgRow);
 
     try {
       organization.update(fields, rowVersion);
@@ -160,15 +111,7 @@ export class TenantsService {
 
     await this.prisma.organization.update({
       where: { id: organization.id },
-      data: {
-        legalName: organization.legalName,
-        tradeName: organization.tradeName,
-        cnpjDigits: organization.cnpjDigits,
-        taxProfile: organization.taxProfile,
-        regionalConfigId: organization.regionalConfigId,
-        rowVersion: organization.rowVersion,
-        updatedAt: organization.updatedAt,
-      },
+      data: organization,
     });
   }
 }

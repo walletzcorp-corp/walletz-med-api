@@ -26,6 +26,12 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   const port = process.env.PORT ?? 3000;
+
+  app.enableCors({
+    origin: 'http://localhost:5173', // URL do seu front-end React
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, // Permite o envio de cookies/headers de sessão se necessário
+  });
   await app.listen(port);
   console.log(`walletz-med-api rodando em http://localhost:${port}`);
 }

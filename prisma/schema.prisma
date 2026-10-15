@@ -31,6 +31,13 @@ enum TaxProfile {
   MEI
 }
 
+enum UnitStatus {
+  RASCUNHO
+  ATIVA
+  BLOQUEADA
+  INATIVA
+}
+
 // ---------------------------------------------------------------------------
 // Tenant
 // tenant_key: gerado como hex de 32 bytes — imprevisível e não reutilizável.
@@ -70,4 +77,30 @@ model Organization {
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
   @@map("organization")
+
+  units Unit[]
+}
+
+//-----------------------------------------
+// Unit
+//-----------------------------------------
+
+model Unit {
+  id String @id @default(uuid()) @map("unit_id")
+  organizationId String @map("organization_id")
+  unitCode String @map("code")
+  name String? @map("name")
+  Adress String? @map("adress")
+  municipality String? @map("municipality")
+  uf String? @map("UF")
+  timezone String? @map("timezone")
+  status UnitStatus @default(RASCUNHO)
+
+  row_version Int @default(1)
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, unitCode])
+
+  @@map("units")
 }

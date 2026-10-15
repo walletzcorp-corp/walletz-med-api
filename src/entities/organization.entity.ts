@@ -4,60 +4,56 @@ import { InvalidOrganizationError } from '../common/errors/organization.errors';
 export type OrgStatus = 'ACTIVE' | 'INACTIVE';
 
 export type TaxProfile =
-  | 'SIMPLES_NACIONAL'
-  | 'LUCRO_PRESUMIDO'
-  | 'LUCRO_REAL'
-  | 'MEI';
+  'SIMPLES_NACIONAL' | 'LUCRO_PRESUMIDO' | 'LUCRO_REAL' | 'MEI';
 
-export interface OrganizationProps {
-  tenantId: string;
+export class OrganizationEntity {
+  // PROPRIEDADES
+  readonly id: string;
+  readonly tenantId: string;
   legalName: string;
   tradeName: string;
-  /** Exatamente 14 dígitos numéricos, sem pontuação. */
   cnpjDigits: string;
   taxProfile: TaxProfile;
   regionalConfigId: string;
   status: OrgStatus;
-  /** Versão para controle de concorrência optimista. */
   rowVersion: number;
-  createdAt: Date;
+  readonly createdAt: Date;
   updatedAt: Date;
-}
 
-export interface CreateOrganizationInput {
-  tenantId: string;
-  legalName: string;
-  tradeName: string;
-  cnpjDigits: string;
-  taxProfile: TaxProfile;
-  regionalConfigId: string;
-}
+  //FIM DAS PROPRIEDADES
 
-export interface UpdateOrganizationFields {
-  legalName?: string;
-  tradeName?: string;
-  cnpjDigits?: string;
-  taxProfile?: TaxProfile;
-  regionalConfigId?: string;
-}
+  private constructor(data: Omit<OrganizationEntity, 'update' | 'deactivate'>) {
+    this.id = data.id;
+    this.tenantId = data.tenantId;
+    this.legalName = data.legalName;
+    this.tradeName = data.tradeName;
+    this.cnpjDigits = data.cnpjDigits;
+    this.taxProfile = data.taxProfile;
+    this.regionalConfigId = data.regionalConfigId;
+    this.status = data.status;
+    this.rowVersion = data.rowVersion;
+    this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
+  }
 
-/**
- * Organização vinculada 1-para-1 a um Tenant.
- * Criada sempre junto com o Tenant. Histórico nunca é deletado.
- */
-export class Organization {
-  private constructor(
-    public readonly id: string,
-    private props: OrganizationProps,
-  ) {}
-
-  static create(input: CreateOrganizationInput): Organization {
-    Organization.assertCnpj(input.cnpjDigits);
-    Organization.assertNonEmpty(input.legalName, 'Razão social');
-    Organization.assertNonEmpty(input.tradeName, 'Nome fantasia');
+  static createIsValid(
+    input: Pick<
+      OrganizationEntity,
+      | 'tenantId'
+      | 'legalName'
+      | 'tradeName'
+      | 'cnpjDigits'
+      | 'taxProfile'
+      | 'regionalConfigId'
+    >,
+  ): OrganizationEntity {
+    OrganizationEntity.assertCnpj(input.cnpjDigits);
+    OrganizationEntity.assertNonEmpty(input.legalName, 'Razão social');
+    OrganizationEntity.assertNonEmpty(input.tradeName, 'Nome fantasia');
     const now = new Date();
-    return new Organization(randomUUID(), {
+    return new OrganizationEntity({
       ...input,
+      id: randomUUID(),
       status: 'ACTIVE',
       rowVersion: 1,
       createdAt: now,
@@ -65,49 +61,58 @@ export class Organization {
     });
   }
 
-  static restore(id: string, props: OrganizationProps): Organization {
-    return new Organization(id, props);
+  /** Reidrata a entidade a partir do registro do banco. */
+  static restore(
+    data: Omit<OrganizationEntity, 'update' | 'deactivate'>,
+  ): OrganizationEntity {
+    return new OrganizationEntity(data);
   }
-
-  get tenantId(): string { return this.props.tenantId; }
-  get legalName(): string { return this.props.legalName; }
-  get tradeName(): string { return this.props.tradeName; }
-  get cnpjDigits(): string { return this.props.cnpjDigits; }
-  get taxProfile(): TaxProfile { return this.props.taxProfile; }
-  get regionalConfigId(): string { return this.props.regionalConfigId; }
-  get status(): OrgStatus { return this.props.status; }
-  get rowVersion(): number { return this.props.rowVersion; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
 
   /**
    * Atualiza campos com controle de concorrência optimista.
    * @throws OrganizationVersionConflictError se expectedVersion !== rowVersion atual.
    */
-  update(fields: UpdateOrganizationFields, expectedVersion: number): void {
-    if (this.props.rowVersion !== expectedVersion) {
+  update(
+    fields: Partial<
+      Pick<
+        OrganizationEntity,
+        | 'legalName'
+        | 'tradeName'
+        | 'cnpjDigits'
+        | 'taxProfile'
+        | 'regionalConfigId'
+      >
+    >,
+    expectedVersion: number,
+  ): void {
+    if (this.rowVersion !== expectedVersion) {
       throw new OrganizationVersionConflictError(
-        `Conflito de versão: esperado ${expectedVersion}, atual ${this.props.rowVersion}.`,
+        `Conflito de versão: esperado ${expectedVersion}, atual ${this.rowVersion}.`,
       );
     }
-    if (fields.cnpjDigits !== undefined) Organization.assertCnpj(fields.cnpjDigits);
-    if (fields.legalName !== undefined) Organization.assertNonEmpty(fields.legalName, 'Razão social');
-    if (fields.tradeName !== undefined) Organization.assertNonEmpty(fields.tradeName, 'Nome fantasia');
+    if (fields.cnpjDigits !== undefined)
+      OrganizationEntity.assertCnpj(fields.cnpjDigits);
+    if (fields.legalName !== undefined)
+      OrganizationEntity.assertNonEmpty(fields.legalName, 'Razão social');
+    if (fields.tradeName !== undefined)
+      OrganizationEntity.assertNonEmpty(fields.tradeName, 'Nome fantasia');
 
-    Object.assign(this.props, fields);
-    this.props.rowVersion += 1;
-    this.props.updatedAt = new Date();
+    Object.assign(this, fields);
+    this.rowVersion += 1;
+    this.updatedAt = new Date();
   }
 
   deactivate(): void {
-    this.props.status = 'INACTIVE';
-    this.props.rowVersion += 1;
-    this.props.updatedAt = new Date();
+    this.status = 'INACTIVE';
+    this.rowVersion += 1;
+    this.updatedAt = new Date();
   }
 
   private static assertCnpj(cnpjDigits: string): void {
-    if (!/^\d{14}$/.test(cnpjDigits)) {
-      throw new InvalidOrganizationError('CNPJ deve conter exatamente 14 dígitos numéricos.');
+    if (!/^[A-Za-z0-9]{12}\d{2}$/.test(cnpjDigits)) {
+      throw new InvalidOrganizationError(
+        'CNPJ deve conter exatamente 14 caracteres alfanuméricos válidos.',
+      );
     }
   }
 
