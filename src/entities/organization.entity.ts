@@ -61,7 +61,7 @@ export class OrganizationEntity {
     });
   }
 
-  /** Reidrata a entidade a partir do registro do banco. */
+  /* Reidrata a entidade a partir do registro do banco. */
   static restore(
     data: Omit<OrganizationEntity, 'update' | 'deactivate'>,
   ): OrganizationEntity {

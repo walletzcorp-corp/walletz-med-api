@@ -65,11 +65,10 @@ __decorate([
 ], CreateTenantDto.prototype, "taxProfile", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'ID da configuração regional',
+        description: 'ID da configuração regional (obtido em GET /regional-configurations)',
         example: '12345678-1234-1234-1234-123456789012',
     }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateTenantDto.prototype, "regionalConfigId", void 0);
 class UpdateTenantStatusDto {
@@ -117,8 +116,7 @@ __decorate([
 ], UpdateOrganizationDto.prototype, "taxProfile", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], UpdateOrganizationDto.prototype, "regionalConfigId", void 0);
 __decorate([

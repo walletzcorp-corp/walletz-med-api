@@ -59,11 +59,11 @@ export class CreateTenantDto {
   taxProfile!: TaxProfile;
 
   @ApiProperty({
-    description: 'ID da configuração regional',
+    description:
+      'ID da configuração regional (obtido em GET /regional-configurations)',
     example: '12345678-1234-1234-1234-123456789012',
   })
-  @IsString()
-  @IsNotEmpty()
+  @IsUUID()
   regionalConfigId!: string;
 }
 
@@ -104,8 +104,7 @@ export class UpdateOrganizationDto {
   taxProfile?: TaxProfile;
 
   @IsOptional()
-  @IsString()
-  @IsNotEmpty()
+  @IsUUID()
   regionalConfigId?: string;
 
   /** Versão conhecida pelo cliente — obrigatório para controle optimista. */

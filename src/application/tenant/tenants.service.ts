@@ -18,6 +18,8 @@ export class TenantsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateTenantDto) {
+    await this.assertRegionalConfigAvailable(dto.regionalConfigId);
+
     const tenant = TenantEntity.create();
 
     const organization = OrganizationEntity.createIsValid({
@@ -47,7 +49,7 @@ export class TenantsService {
   async findOne(id: string) {
     const row = await this.prisma.tenant.findUnique({
       where: { id },
-      include: { organization: true },
+      include: { organization: { include: { regionalConfig: true } } },
     });
 
     if (!row) throw new NotFoundException('Tenant não encontrado.');
@@ -93,6 +95,10 @@ export class TenantsService {
       where: { tenantId },
     });
 
+    if (fields.regionalConfigId) {
+      await this.assertRegionalConfigAvailable(fields.regionalConfigId);
+    }
+
     if (!orgRow)
       throw new NotFoundException(
         'Organização não encontrada para este tenant.',
@@ -113,5 +119,17 @@ export class TenantsService {
       where: { id: organization.id },
       data: organization,
     });
+  }
+
+  private async assertRegionalConfigAvailable(id: string) {
+    const config = await this.prisma.regionalConfiguration.findUnique({
+      where: { id },
+    });
+
+    if (!config || !config.active) {
+      throw new BadRequestException(
+        'Configuração regional invalida ou indísponivel',
+      );
+    }
   }
 }

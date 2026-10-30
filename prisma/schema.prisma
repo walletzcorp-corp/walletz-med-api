@@ -31,6 +31,7 @@ enum TaxProfile {
   MEI
 }
 
+
 enum UnitStatus {
   RASCUNHO
   ATIVA
@@ -75,22 +76,44 @@ model Organization {
   updatedAt        DateTime   @updatedAt @map("updated_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
-
-  @@map("organization")
+  regionalConfig RegionalConfiguration @relation(fields: [regionalConfigId], references: [id])
 
   units Unit[]
+
+  @@map("organization")
 }
+
+//----------------------------------------
+//RegionalConfiguration
+
+model RegionalConfiguration {
+
+  id String @id @default(uuid()) @map("regional_config_id")
+  code String @unique @map("code") //ex:'BR_SP'
+  name String @map("name")
+  currency String @map("currency")
+  locale String @map("locale")
+  timezone String @map("timezone")
+  active Boolean @default(true) @map("active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  organization Organization[]
+
+  @@map("regional_configuration")
+}
+
+
 
 //-----------------------------------------
 // Unit
-//-----------------------------------------
+
 
 model Unit {
   id String @id @default(uuid()) @map("unit_id")
   organizationId String @map("organization_id")
   unitCode String @map("code")
   name String? @map("name")
-  Adress String? @map("adress")
+  address String? @map("address")
   municipality String? @map("municipality")
   uf String? @map("UF")
   timezone String? @map("timezone")
@@ -98,9 +121,15 @@ model Unit {
 
   row_version Int @default(1)
 
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
   organization Organization @relation(fields: [organizationId], references: [id])
 
   @@unique([organizationId, unitCode])
 
   @@map("units")
 }
+
+//-----------------------------------------
+
