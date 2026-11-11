@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { InvalidOrganizationError } from '../common/errors/organization.errors';
+import { UnitEntity } from './unit.entity';
 
 export type OrgStatus = 'ACTIVE' | 'INACTIVE';
 
@@ -19,6 +20,7 @@ export class OrganizationEntity {
   rowVersion: number;
   readonly createdAt: Date;
   updatedAt: Date;
+  Unit?: UnitEntity[] | null;
 
   //FIM DAS PROPRIEDADES
 
@@ -34,6 +36,7 @@ export class OrganizationEntity {
     this.rowVersion = data.rowVersion;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
+    this.Unit = data.Unit ?? null;
   }
 
   static createIsValid(

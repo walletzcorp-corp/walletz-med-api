@@ -14,6 +14,7 @@ const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class CreateUnitDto {
     name;
+    country;
     address;
     municipality;
     uf;
@@ -31,6 +32,19 @@ __decorate([
 ], CreateUnitDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
+        description: 'Código do país da unidade (padrão ISO 2 letras). Por enquanto, apenas BR.',
+        example: 'BR',
+        enum: ['BR'],
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.Length)(2, 2, {
+        message: 'O código do país deve ter exatamente 2 caracteres.',
+    }),
+    __metadata("design:type", String)
+], CreateUnitDto.prototype, "country", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
         description: 'Endereço completo da unidade',
         example: 'Av. Paulista, 1000 - Bela Vista',
     }),
@@ -40,7 +54,7 @@ __decorate([
 ], CreateUnitDto.prototype, "address", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Municício da unidade',
+        description: 'Município da unidade',
         example: 'São Paulo',
     }),
     (0, class_validator_1.IsString)(),
@@ -65,8 +79,9 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUnitDto.prototype, "timezone", void 0);
 class UpdateUnitDto {
-    rowVersio;
+    rowVersion;
     name;
+    country;
     address;
     municipality;
     uf;
@@ -74,31 +89,69 @@ class UpdateUnitDto {
 }
 exports.UpdateUnitDto = UpdateUnitDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Versão da unidade (rowVersion) para controle de concorrência',
+        example: 1,
+    }),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Number)
-], UpdateUnitDto.prototype, "rowVersio", void 0);
+], UpdateUnitDto.prototype, "rowVersion", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Novo nome da unidade',
+        example: 'Unidade Central Jardins - Bloco B',
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.MaxLength)(200),
     __metadata("design:type", String)
 ], UpdateUnitDto.prototype, "name", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Novo código do país da unidade (padrão ISO 2 letras). Por enquanto, apenas BR.',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Length)(2, 2),
+    __metadata("design:type", String)
+], UpdateUnitDto.prototype, "country", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Novo endereço da unidade',
+        example: 'Av. Paulista, 1000 - Bela Vista',
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateUnitDto.prototype, "address", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Novo município da unidade',
+        example: 'São Paulo',
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateUnitDto.prototype, "municipality", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Nova UF (Estado) da unidade',
+        example: 'SP',
+    }),
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Nova UF (Estado) da unidade',
+        example: 'SP',
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateUnitDto.prototype, "uf", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Novo fuso horário da unidade',
+        example: 'America/Sao_Paulo',
+    }),
     (0, class_validator_1.IsTimeZone)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -108,6 +161,10 @@ class BlockUnitDto {
 }
 exports.BlockUnitDto = BlockUnitDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Motivo do bloqueio da unidade',
+        example: 'Manutenção programada',
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)({ message: 'O motivo do bloqueio é obrigatório.' }),
     __metadata("design:type", String)

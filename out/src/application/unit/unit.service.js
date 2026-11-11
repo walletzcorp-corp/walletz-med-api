@@ -33,6 +33,7 @@ let UnitService = class UnitService {
                 organizationId,
                 code,
                 name: dto.name,
+                country: dto.country,
                 address: dto.address,
                 municipality: dto.municipality,
                 uf: dto.uf,
@@ -71,9 +72,92 @@ let UnitService = class UnitService {
         const nextNumber = currentNumber + 1;
         return `UN-${String(nextNumber).padStart(4, '0')}`;
     }
-    async activate() { }
-    async block() { }
-    async update(id, organizationId, dto) { }
+    async getUnitOrThrow(id, organizationId) {
+        const row = await this.prisma.unit.findFirst({
+            where: { id, organizationId },
+        });
+        if (!row)
+            throw new common_1.NotFoundException('Unidade não encontrada nesta organização.');
+        return row;
+    }
+    async findOne(id, organizationId) {
+        const row = await this.getUnitOrThrow(id, organizationId);
+        return unit_entity_1.UnitEntity.restore(row);
+    }
+    async activate(id, organizationId) {
+        const row = await this.getUnitOrThrow(id, organizationId);
+        const unit = unit_entity_1.UnitEntity.restore(row);
+        try {
+            unit.activate();
+        }
+        catch (err) {
+            if (err.name === 'UnitChecklistPendingError') {
+                throw new common_1.UnprocessableEntityException({
+                    message: err.message,
+                    missingFields: err.missingFields,
+                });
+            }
+            throw new common_1.BadRequestException(err.message);
+        }
+        await this.prisma.unit.update({
+            where: { id: unit.id },
+            data: {
+                status: unit.status,
+                row_version: unit.rowVersion,
+                updatedAt: new Date(),
+            },
+        });
+        return unit;
+    }
+    async block(id, organizationId, dto) {
+        const row = await this.getUnitOrThrow(id, organizationId);
+        const unit = unit_entity_1.UnitEntity.restore(row);
+        unit.block(dto.reason);
+        await this.prisma.unit.update({
+            where: { id: unit.id },
+            data: {
+                status: unit.status,
+                row_version: unit.rowVersion,
+                updatedAt: new Date(),
+            },
+        });
+        return unit;
+    }
+    async findAllByOrganization(organizationId) {
+        const rows = await this.prisma.unit.findMany({
+            where: { organizationId },
+            orderBy: { unitCode: 'asc' },
+        });
+        return rows.map((r) => unit_entity_1.UnitEntity.restore(r));
+    }
+    async update(id, organizationId, dto) {
+        const { rowVersion, ...fields } = dto;
+        const row = await this.getUnitOrThrow(id, organizationId);
+        const unit = unit_entity_1.UnitEntity.restore(row);
+        try {
+            unit.update(fields, rowVersion);
+        }
+        catch (err) {
+            if (err.name === 'UnitVersionConflictError') {
+                throw new common_1.ConflictException(err.message);
+            }
+            throw new common_1.BadRequestException(err.message);
+        }
+        await this.prisma.unit.update({
+            where: { id: unit.id },
+            data: {
+                name: unit.name,
+                country: unit.country,
+                address: unit.address,
+                municipality: unit.municipality,
+                uf: unit.uf,
+                timezone: unit.timezone,
+                row_version: unit.rowVersion,
+                updatedAt: new Date(),
+            },
+        });
+        return unit;
+    }
 };
 exports.UnitService = UnitService;
 exports.UnitService = UnitService = __decorate([

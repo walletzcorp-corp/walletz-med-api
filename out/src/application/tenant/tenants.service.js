@@ -31,29 +31,45 @@ let TenantsService = class TenantsService {
             regionalConfigId: dto.regionalConfigId,
         });
         await this.prisma.$transaction([
-            this.prisma.tenant.create({ data: tenant }),
+            this.prisma.tenant.create({
+                data: {
+                    id: tenant.id,
+                    key: tenant.key,
+                    status: tenant.status,
+                    createdAt: tenant.createdAt,
+                },
+            }),
             this.prisma.organization.create({ data: organization }),
         ]);
-        return { tenant, organization };
+        tenant.organization = organization;
+        return tenant;
     }
     async findAll() {
         const rows = await this.prisma.tenant.findMany({
             orderBy: { createdAt: 'desc' },
+            include: { organization: true },
         });
-        return rows.map((row) => tenant_entity_1.TenantEntity.restore(row));
+        return rows.map((row) => ({
+            tenant: tenant_entity_1.TenantEntity.restore(row),
+            organization: row.organization
+                ? organization_entity_1.OrganizationEntity.restore(row.organization)
+                : null,
+        }));
     }
     async findOne(id) {
         const row = await this.prisma.tenant.findUnique({
             where: { id },
-            include: { organization: { include: { regionalConfig: true } } },
+            include: { organization: true },
         });
         if (!row)
             throw new common_1.NotFoundException('Tenant não encontrado.');
-        const tenant = tenant_entity_1.TenantEntity.restore(row);
-        const organization = row.organization
-            ? organization_entity_1.OrganizationEntity.restore(row.organization)
-            : null;
-        return { tenant, organization };
+        return tenant_entity_1.TenantEntity.restore(row);
+    }
+    async getOrganization() {
+        const row = await this.prisma.organization.findMany({
+            orderBy: { createdAt: 'desc' },
+        });
+        return row.map((row) => organization_entity_1.OrganizationEntity.restore(row));
     }
     async updateStatus(id, dto) {
         const row = await this.prisma.tenant.findUnique({ where: { id } });

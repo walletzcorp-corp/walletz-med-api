@@ -1,13 +1,15 @@
 export declare class CreateUnitDto {
     name: string;
+    country: string;
     address: string;
     municipality: string;
     uf: string;
     timezone: string;
 }
 export declare class UpdateUnitDto {
-    rowVersio: number;
+    rowVersion: number;
     name?: string;
+    country?: string;
     address?: string;
     municipality?: string;
     uf?: string;

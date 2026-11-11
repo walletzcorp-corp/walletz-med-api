@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { RegionalConfigurationService } from 'src/application/regional.configuration/regional-configuration.service';
+import { RegionalConfigurationService } from 'src/application/regional.configuration/regional.configuration.service';
 
 @ApiTags('Regional Configurations')
 @Controller('regional-configurations')

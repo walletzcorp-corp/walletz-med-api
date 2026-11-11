@@ -3,29 +3,17 @@ import { CreateTenantDto, UpdateOrganizationDto, UpdateTenantStatusDto } from '.
 export declare class TenantsController {
     private readonly tenantsService;
     constructor(tenantsService: TenantsService);
-    create(dto: CreateTenantDto): Promise<{
-        id: string;
-        key: string;
-        status: import("../../entities/tenant.entity").TenantStatus;
-        createdAt: Date;
-        organization: import("../../entities/organization.entity").OrganizationEntity;
-    }>;
+    create(dto: CreateTenantDto): Promise<import("../../entities/tenant.entity").TenantEntity>;
     findAll(): Promise<{
         id: string;
         key: string;
         status: import("../../entities/tenant.entity").TenantStatus;
         createdAt: Date;
-        organization: null;
-    }[]>;
-    findOne(id: string): Promise<{
-        id: string;
-        key: string;
-        status: import("../../entities/tenant.entity").TenantStatus;
-        createdAt: Date;
         organization: import("../../entities/organization.entity").OrganizationEntity | null;
-    }>;
+    }[]>;
+    findOne(id: string): Promise<import("../../entities/tenant.entity").TenantEntity>;
     updateStatus(id: string, dto: UpdateTenantStatusDto): Promise<void>;
     updateOrganization(id: string, dto: UpdateOrganizationDto): Promise<void>;
-    getOrganization(id: string): Promise<import("../../entities/organization.entity").OrganizationEntity | null>;
+    getOrganization(id: string): Promise<import("../../entities/organization.entity").OrganizationEntity | null | undefined>;
     updateOrg(id: string, dto: UpdateOrganizationDto): Promise<void>;
 }

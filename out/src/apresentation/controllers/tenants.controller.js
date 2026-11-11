@@ -23,34 +23,20 @@ let TenantsController = class TenantsController {
         this.tenantsService = tenantsService;
     }
     async create(dto) {
-        const { tenant, organization } = await this.tenantsService.create(dto);
-        return {
+        return this.tenantsService.create(dto);
+    }
+    async findAll() {
+        const items = await this.tenantsService.findAll();
+        return items.map(({ tenant, organization }) => ({
             id: tenant.id,
             key: tenant.key,
             status: tenant.status,
             createdAt: tenant.createdAt,
             organization,
-        };
-    }
-    async findAll() {
-        const tenants = await this.tenantsService.findAll();
-        return tenants.map((tenant) => ({
-            id: tenant.id,
-            key: tenant.key,
-            status: tenant.status,
-            createdAt: tenant.createdAt,
-            organization: null,
         }));
     }
     async findOne(id) {
-        const { tenant, organization } = await this.tenantsService.findOne(id);
-        return {
-            id: tenant.id,
-            key: tenant.key,
-            status: tenant.status,
-            createdAt: tenant.createdAt,
-            organization,
-        };
+        return this.tenantsService.findOne(id);
     }
     async updateStatus(id, dto) {
         await this.tenantsService.updateStatus(id, dto);
@@ -59,8 +45,8 @@ let TenantsController = class TenantsController {
         await this.tenantsService.updateOrganization(id, dto);
     }
     async getOrganization(id) {
-        const { organization } = await this.tenantsService.findOne(id);
-        return organization;
+        const tenant = await this.tenantsService.findOne(id);
+        return tenant.organization;
     }
     async updateOrg(id, dto) {
         await this.tenantsService.updateOrganization(id, dto);

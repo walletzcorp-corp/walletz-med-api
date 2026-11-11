@@ -1,9 +1,11 @@
+import { OrganizationEntity } from './organization.entity';
 export type UnitStatus = 'RASCUNHO' | 'ATIVA' | 'INATIVA' | 'BLOQUEADA';
 export declare class UnitEntity {
     readonly id: string;
     readonly organizationId: string;
     readonly code: string;
     name: string;
+    country: string;
     address: string;
     municipality: string;
     uf: string;
@@ -12,11 +14,13 @@ export declare class UnitEntity {
     rowVersion: number;
     readonly createdAt: Date;
     updatedAt: Date;
+    organization?: OrganizationEntity | null;
     private constructor();
     static create(input: {
         organizationId: string;
         code: string;
         name: string;
+        country: string;
         address: string;
         municipality: string;
         uf: string;
@@ -27,6 +31,7 @@ export declare class UnitEntity {
         organizationId: string;
         unitCode: string;
         name: string | null;
+        country: string;
         address: string | null;
         municipality: string | null;
         uf: string | null;
@@ -39,7 +44,8 @@ export declare class UnitEntity {
     activate(): void;
     block(reason: string): void;
     inactivate(): void;
-    update(fields: Partial<Pick<UnitEntity, 'name' | 'address' | 'municipality' | 'uf' | 'timezone'>>, expectedVersion: number): void;
+    update(fields: Partial<Pick<UnitEntity, 'name' | 'country' | 'address' | 'municipality' | 'uf' | 'timezone'>>, expectedVersion: number): void;
+    private static assertCountry;
     private static assertTimezone;
     private static assertUf;
 }

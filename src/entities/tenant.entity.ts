@@ -1,5 +1,6 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { InvalidTenantError } from '../common/errors/tenant.errors';
+import { OrganizationEntity } from './organization.entity';
 
 export type TenantStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 
@@ -10,6 +11,7 @@ export class TenantEntity {
   readonly key: string;
   status: TenantStatus;
   readonly createdAt: Date;
+  organization?: OrganizationEntity | null;
 
   //FIM DAS PROPRIEDADES
 
@@ -20,6 +22,7 @@ export class TenantEntity {
     this.key = data.key;
     this.status = data.status;
     this.createdAt = data.createdAt;
+    this.organization = data.organization ?? null;
   }
 
   /** Cria novo tenant com key segura gerada automaticamente. */
@@ -33,10 +36,22 @@ export class TenantEntity {
   }
 
   /** Reidrata do banco (já validado antes de ser persistido). */
-  static restore(
-    data: Omit<TenantEntity, 'activate' | 'deactivate' | 'suspend'>,
-  ): TenantEntity {
-    return new TenantEntity(data);
+  static restore(data: {
+    id: string;
+    key: string;
+    status: TenantStatus;
+    createdAt: Date;
+    organization?: Parameters<typeof OrganizationEntity.restore>[0] | null;
+  }): TenantEntity {
+    return new TenantEntity({
+      id: data.id,
+      key: data.key,
+      status: data.status,
+      createdAt: data.createdAt,
+      organization: data.organization
+        ? OrganizationEntity.restore(data.organization)
+        : null,
+    });
   }
 
   activate(): void {

@@ -4,6 +4,7 @@ import {
   UnitChecklistPendingError,
   UnitVersionConflictError,
 } from 'src/common/errors/unit.error';
+import { OrganizationEntity } from './organization.entity';
 
 export type UnitStatus = 'RASCUNHO' | 'ATIVA' | 'INATIVA' | 'BLOQUEADA';
 
@@ -12,6 +13,7 @@ export class UnitEntity {
   readonly organizationId: string;
   readonly code: string; //readonly = imutável
   name: string;
+  country: string;
   address: string;
   municipality: string;
   uf: string;
@@ -20,6 +22,7 @@ export class UnitEntity {
   rowVersion: number;
   readonly createdAt: Date;
   updatedAt: Date;
+  organization?: OrganizationEntity | null;
 
   private constructor(
     data: Omit<UnitEntity, 'activate' | 'block' | 'inactivate' | 'update'>,
@@ -28,6 +31,7 @@ export class UnitEntity {
     this.organizationId = data.organizationId;
     this.code = data.code;
     this.name = data.name;
+    this.country = data.country;
     this.address = data.address;
     this.municipality = data.municipality;
     this.uf = data.uf;
@@ -42,6 +46,7 @@ export class UnitEntity {
     organizationId: string;
     code: string;
     name: string;
+    country: string;
     address: string;
     municipality: string;
     uf: string;
@@ -54,6 +59,7 @@ export class UnitEntity {
       organizationId: input.organizationId,
       code: input.code.trim(),
       name: input.name.trim(),
+      country: input.country.trim().toUpperCase(),
       address: input.address.trim(),
       municipality: input.municipality.trim(),
       uf: input.uf.trim().toUpperCase(),
@@ -69,6 +75,7 @@ export class UnitEntity {
     organizationId: string;
     unitCode: string;
     name: string | null;
+    country: string;
     address: string | null;
     municipality: string | null;
     uf: string | null;
@@ -83,6 +90,7 @@ export class UnitEntity {
       organizationId: data.organizationId,
       code: data.unitCode,
       name: data.name ?? '',
+      country: data.country ?? 'BR',
       address: data.address ?? '',
       municipality: data.municipality ?? '',
       uf: data.uf ?? '',
@@ -106,6 +114,7 @@ export class UnitEntity {
 
     const pendingFields: string[] = [];
     if (!this.name?.trim()) pendingFields.push('nome');
+    if (!this.country?.trim()) pendingFields.push('país');
     if (!this.code?.trim()) pendingFields.push('código');
     if (!this.address?.trim()) pendingFields.push('endereço');
     if (!this.municipality?.trim()) pendingFields.push('município');
@@ -141,7 +150,10 @@ export class UnitEntity {
 
   update(
     fields: Partial<
-      Pick<UnitEntity, 'name' | 'address' | 'municipality' | 'uf' | 'timezone'>
+      Pick<
+        UnitEntity,
+        'name' | 'country' | 'address' | 'municipality' | 'uf' | 'timezone'
+      >
     >,
     expectedVersion: number,
   ): void {
@@ -151,6 +163,8 @@ export class UnitEntity {
       );
     }
 
+    if (fields.country) UnitEntity.assertCountry(fields.country);
+
     if (fields.timezone) UnitEntity.assertTimezone(fields.timezone);
 
     if (fields.uf) UnitEntity.assertUf(fields.uf);
@@ -158,6 +172,14 @@ export class UnitEntity {
     Object.assign(this, fields);
     this.rowVersion += 1;
     this.updatedAt = new Date();
+  }
+
+  private static assertCountry(country: string): void {
+    const allowedContries = ['BR'];
+    if (!allowedContries.includes(country.toUpperCase())) {
+      throw new InvalidUnitError(`País '${country}' não é suportado no momento. 
+        Paises suportados: ${allowedContries.join(', ')}`);
+    }
   }
 
   private static assertTimezone(tz: string): void {

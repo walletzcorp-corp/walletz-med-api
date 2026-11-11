@@ -10,7 +10,6 @@ exports.UnitModule = void 0;
 const common_1 = require("@nestjs/common");
 const unit_controller_1 = require("../../apresentation/controllers/unit.controller");
 const unit_service_1 = require("./unit.service");
-('src/apresentation/controllers/units.controller');
 let UnitModule = class UnitModule {
 };
 exports.UnitModule = UnitModule;

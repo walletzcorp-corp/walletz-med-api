@@ -8,6 +8,7 @@ class UnitEntity {
     organizationId;
     code;
     name;
+    country;
     address;
     municipality;
     uf;
@@ -16,11 +17,13 @@ class UnitEntity {
     rowVersion;
     createdAt;
     updatedAt;
+    organization;
     constructor(data) {
         this.id = data.id;
         this.organizationId = data.organizationId;
         this.code = data.code;
         this.name = data.name;
+        this.country = data.country;
         this.address = data.address;
         this.municipality = data.municipality;
         this.uf = data.uf;
@@ -37,6 +40,7 @@ class UnitEntity {
             organizationId: input.organizationId,
             code: input.code.trim(),
             name: input.name.trim(),
+            country: input.country.trim().toUpperCase(),
             address: input.address.trim(),
             municipality: input.municipality.trim(),
             uf: input.uf.trim().toUpperCase(),
@@ -53,6 +57,7 @@ class UnitEntity {
             organizationId: data.organizationId,
             code: data.unitCode,
             name: data.name ?? '',
+            country: data.country ?? 'BR',
             address: data.address ?? '',
             municipality: data.municipality ?? '',
             uf: data.uf ?? '',
@@ -72,6 +77,8 @@ class UnitEntity {
         const pendingFields = [];
         if (!this.name?.trim())
             pendingFields.push('nome');
+        if (!this.country?.trim())
+            pendingFields.push('país');
         if (!this.code?.trim())
             pendingFields.push('código');
         if (!this.address?.trim())
@@ -109,6 +116,8 @@ class UnitEntity {
         if (this.rowVersion !== expectedVersion) {
             throw new unit_error_1.UnitVersionConflictError(`Conflito de versão: esperado ${expectedVersion}, atual ${this.rowVersion}.`);
         }
+        if (fields.country)
+            UnitEntity.assertCountry(fields.country);
         if (fields.timezone)
             UnitEntity.assertTimezone(fields.timezone);
         if (fields.uf)
@@ -116,6 +125,13 @@ class UnitEntity {
         Object.assign(this, fields);
         this.rowVersion += 1;
         this.updatedAt = new Date();
+    }
+    static assertCountry(country) {
+        const allowedContries = ['BR'];
+        if (!allowedContries.includes(country.toUpperCase())) {
+            throw new unit_error_1.InvalidUnitError(`País '${country}' não é suportado no momento. 
+        Paises suportados: ${allowedContries.join(', ')}`);
+        }
     }
     static assertTimezone(tz) {
         if (!Intl.supportedValuesOf('timeZone').includes(tz)) {

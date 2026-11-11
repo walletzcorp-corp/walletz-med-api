@@ -113,6 +113,7 @@ model Unit {
   organizationId String @map("organization_id")
   unitCode String @map("code")
   name String? @map("name")
+  country String @default("BR") @map("country")
   address String? @map("address")
   municipality String? @map("municipality")
   uf String? @map("UF")

@@ -3,16 +3,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TenantEntity = void 0;
 const node_crypto_1 = require("node:crypto");
 const tenant_errors_1 = require("../common/errors/tenant.errors");
+const organization_entity_1 = require("./organization.entity");
 class TenantEntity {
     id;
     key;
     status;
     createdAt;
+    organization;
     constructor(data) {
         this.id = data.id;
         this.key = data.key;
         this.status = data.status;
         this.createdAt = data.createdAt;
+        this.organization = data.organization ?? null;
     }
     static create() {
         return new TenantEntity({
@@ -23,7 +26,15 @@ class TenantEntity {
         });
     }
     static restore(data) {
-        return new TenantEntity(data);
+        return new TenantEntity({
+            id: data.id,
+            key: data.key,
+            status: data.status,
+            createdAt: data.createdAt,
+            organization: data.organization
+                ? organization_entity_1.OrganizationEntity.restore(data.organization)
+                : null,
+        });
     }
     activate() {
         if (this.status === 'ACTIVE')

@@ -1,4 +1,4 @@
-import { CreateUnitDto, UpdateUnitDto } from "../../apresentation/dto/unit.dto";
+import { BlockUnitDto, CreateUnitDto, UpdateUnitDto } from "../../apresentation/dto/unit.dto";
 import { UnitEntity } from "../../entities/unit.entity";
 import { PrismaService } from "../../prisma/prisma.service";
 export declare class UnitService {
@@ -6,7 +6,10 @@ export declare class UnitService {
     constructor(prisma: PrismaService);
     create(organizationId: string, dto: CreateUnitDto): Promise<UnitEntity>;
     private gerenateNextUnitCode;
-    activate(): Promise<void>;
-    block(): Promise<void>;
-    update(id: string, organizationId: string, dto: UpdateUnitDto): Promise<void>;
+    private getUnitOrThrow;
+    findOne(id: string, organizationId: string): Promise<UnitEntity>;
+    activate(id: string, organizationId: string): Promise<UnitEntity>;
+    block(id: string, organizationId: string, dto: BlockUnitDto): Promise<UnitEntity>;
+    findAllByOrganization(organizationId: string): Promise<UnitEntity[]>;
+    update(id: string, organizationId: string, dto: UpdateUnitDto): Promise<UnitEntity>;
 }

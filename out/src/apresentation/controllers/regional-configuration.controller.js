@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegionalConfigurationController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
-const regional_configuration_service_1 = require("../../application/regional.configuration/regional-configuration.service");
+const regional_configuration_service_1 = require("../../application/regional.configuration/regional.configuration.service");
 let RegionalConfigurationController = class RegionalConfigurationController {
     service;
     constructor(service) {

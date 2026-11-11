@@ -32,35 +32,52 @@ export class TenantsService {
     });
 
     await this.prisma.$transaction([
-      this.prisma.tenant.create({ data: tenant }),
+      this.prisma.tenant.create({
+        data: {
+          id: tenant.id,
+          key: tenant.key,
+          status: tenant.status,
+          createdAt: tenant.createdAt,
+        },
+      }),
       this.prisma.organization.create({ data: organization }),
     ]);
 
-    return { tenant, organization };
+    tenant.organization = organization;
+    return tenant;
   }
 
   async findAll() {
     const rows = await this.prisma.tenant.findMany({
       orderBy: { createdAt: 'desc' },
+      include: { organization: true },
     });
-    return rows.map((row) => TenantEntity.restore(row));
+
+    return rows.map((row) => ({
+      tenant: TenantEntity.restore(row),
+      organization: row.organization
+        ? OrganizationEntity.restore(row.organization)
+        : null,
+    }));
   }
 
   async findOne(id: string) {
     const row = await this.prisma.tenant.findUnique({
       where: { id },
-      include: { organization: { include: { regionalConfig: true } } },
+      include: { organization: true },
     });
 
     if (!row) throw new NotFoundException('Tenant não encontrado.');
 
-    const tenant = TenantEntity.restore(row);
+    return TenantEntity.restore(row);
+  }
 
-    const organization = row.organization
-      ? OrganizationEntity.restore(row.organization)
-      : null;
+  async getOrganization() {
+    const row = await this.prisma.organization.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
 
-    return { tenant, organization };
+    return row.map((row) => OrganizationEntity.restore(row));
   }
 
   async updateStatus(id: string, dto: UpdateTenantStatusDto) {

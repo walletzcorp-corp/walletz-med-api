@@ -15,6 +15,7 @@ class OrganizationEntity {
     rowVersion;
     createdAt;
     updatedAt;
+    Unit;
     constructor(data) {
         this.id = data.id;
         this.tenantId = data.tenantId;
@@ -27,6 +28,7 @@ class OrganizationEntity {
         this.rowVersion = data.rowVersion;
         this.createdAt = data.createdAt;
         this.updatedAt = data.updatedAt;
+        this.Unit = data.Unit ?? null;
     }
     static createIsValid(input) {
         OrganizationEntity.assertCnpj(input.cnpjDigits);

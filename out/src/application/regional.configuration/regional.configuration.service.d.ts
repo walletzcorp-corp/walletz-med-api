@@ -4,12 +4,12 @@ export declare class RegionalConfigurationService {
     constructor(prisma: PrismaService);
     findAllActive(): import(".prisma/client").Prisma.PrismaPromise<{
         id: string;
-        createdAt: Date;
-        name: string;
         code: string;
+        name: string;
+        timezone: string;
+        createdAt: Date;
         currency: string;
         locale: string;
-        timezone: string;
         active: boolean;
     }[]>;
 }

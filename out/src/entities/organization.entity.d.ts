@@ -1,3 +1,4 @@
+import { UnitEntity } from './unit.entity';
 export type OrgStatus = 'ACTIVE' | 'INACTIVE';
 export type TaxProfile = 'SIMPLES_NACIONAL' | 'LUCRO_PRESUMIDO' | 'LUCRO_REAL' | 'MEI';
 export declare class OrganizationEntity {
@@ -12,6 +13,7 @@ export declare class OrganizationEntity {
     rowVersion: number;
     readonly createdAt: Date;
     updatedAt: Date;
+    Unit?: UnitEntity[] | null;
     private constructor();
     static createIsValid(input: Pick<OrganizationEntity, 'tenantId' | 'legalName' | 'tradeName' | 'cnpjDigits' | 'taxProfile' | 'regionalConfigId'>): OrganizationEntity;
     static restore(data: Omit<OrganizationEntity, 'update' | 'deactivate'>): OrganizationEntity;

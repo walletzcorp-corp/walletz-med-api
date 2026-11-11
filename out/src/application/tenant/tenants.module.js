@@ -11,7 +11,7 @@ const common_1 = require("@nestjs/common");
 const tenants_controller_1 = require("../../apresentation/controllers/tenants.controller");
 const tenants_service_1 = require("./tenants.service");
 const regional_configuration_controller_1 = require("../../apresentation/controllers/regional-configuration.controller");
-const regional_configuration_service_1 = require("../regional.configuration/regional-configuration.service");
+const regional_configuration_service_1 = require("../regional.configuration/regional.configuration.service");
 let TenantsModule = class TenantsModule {
 };
 exports.TenantsModule = TenantsModule;
