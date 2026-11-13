@@ -18,11 +18,24 @@ let OrganizationService = class OrganizationService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async getOrganization() {
-        const row = await this.prisma.organization.findMany({
-            orderBy: { createdAt: 'desc' },
-        });
-        return row.map((row) => organization_entity_1.OrganizationEntity.restore(row));
+    async getOrganization({ page, limit, }) {
+        const [rows, total] = await this.prisma.$transaction([
+            this.prisma.organization.findMany({
+                orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+                skip: (page - 1) * limit,
+                take: limit,
+            }),
+            this.prisma.organization.count(),
+        ]);
+        return {
+            data: rows.map((row) => organization_entity_1.OrganizationEntity.restore(row)),
+            meta: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        };
     }
 };
 exports.OrganizationService = OrganizationService;
