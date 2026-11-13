@@ -15,7 +15,7 @@ import {
 
 @Injectable()
 export class TenantsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async create(dto: CreateTenantDto) {
     await this.assertRegionalConfigAvailable(dto.regionalConfigId);
@@ -40,7 +40,21 @@ export class TenantsService {
           createdAt: tenant.createdAt,
         },
       }),
-      this.prisma.organization.create({ data: organization }),
+      this.prisma.organization.create({
+        data: {
+          id: organization.id,
+          tenantId: organization.tenantId,
+          legalName: organization.legalName,
+          tradeName: organization.tradeName,
+          cnpjDigits: organization.cnpjDigits,
+          taxProfile: organization.taxProfile,
+          regionalConfigId: organization.regionalConfigId,
+          status: organization.status,
+          rowVersion: organization.rowVersion,
+          createdAt: organization.createdAt,
+          updatedAt: organization.updatedAt,
+        }
+      }),
     ]);
 
     tenant.organization = organization;

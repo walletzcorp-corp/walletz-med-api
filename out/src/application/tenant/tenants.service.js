@@ -39,7 +39,21 @@ let TenantsService = class TenantsService {
                     createdAt: tenant.createdAt,
                 },
             }),
-            this.prisma.organization.create({ data: organization }),
+            this.prisma.organization.create({
+                data: {
+                    id: organization.id,
+                    tenantId: organization.tenantId,
+                    legalName: organization.legalName,
+                    tradeName: organization.tradeName,
+                    cnpjDigits: organization.cnpjDigits,
+                    taxProfile: organization.taxProfile,
+                    regionalConfigId: organization.regionalConfigId,
+                    status: organization.status,
+                    rowVersion: organization.rowVersion,
+                    createdAt: organization.createdAt,
+                    updatedAt: organization.updatedAt,
+                }
+            }),
         ]);
         tenant.organization = organization;
         return tenant;

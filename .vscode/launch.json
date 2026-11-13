@@ -14,6 +14,16 @@
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
       "restart": true
+    },
+    {
+      "name": "Attach Nest (porta 9229)",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/out/**/*.js"],
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "restart": true
     }
   ]
 }
