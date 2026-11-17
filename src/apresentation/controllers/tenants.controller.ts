@@ -31,26 +31,7 @@ export class TenantsController {
     description: 'Tenant e Organização criados com sucesso.',
   })
   async create(@Body() dto: CreateTenantDto) {
-    const { tenant, organization } = await this.tenantsService.create(dto);
-    return {
-      id: tenant.id,
-      key: tenant.key,
-      status: tenant.status,
-      createdAt: tenant.createdAt,
-      organization: {
-        id: organization.id,
-        tenantId: organization.tenantId,
-        legalName: organization.legalName,
-        tradeName: organization.tradeName,
-        cnpjDigits: organization.cnpjDigits,
-        taxProfile: organization.taxProfile,
-        regionalConfigId: organization.regionalConfigId,
-        status: organization.status,
-        rowVersion: organization.rowVersion,
-        createdAt: organization.createdAt,
-        updatedAt: organization.updatedAt,
-      },
-    };
+    return this.tenantsService.create(dto);
   }
 
   @ApiOperation({
@@ -59,13 +40,13 @@ export class TenantsController {
   })
   @Get()
   async findAll() {
-    const tenants = await this.tenantsService.findAll();
-    return tenants.map((tenant) => ({
+    const items = await this.tenantsService.findAll();
+    return items.map(({ tenant, organization }) => ({
       id: tenant.id,
       key: tenant.key,
       status: tenant.status,
       createdAt: tenant.createdAt,
-      organization: null,
+      organization,
     }));
   }
 
@@ -76,28 +57,7 @@ export class TenantsController {
   })
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const { tenant, organization } = await this.tenantsService.findOne(id);
-    return {
-      id: tenant.id,
-      key: tenant.key,
-      status: tenant.status,
-      createdAt: tenant.createdAt,
-      organization: organization
-        ? {
-            id: organization.id,
-            tenantId: organization.tenantId,
-            legalName: organization.legalName,
-            tradeName: organization.tradeName,
-            cnpjDigits: organization.cnpjDigits,
-            taxProfile: organization.taxProfile,
-            regionalConfigId: organization.regionalConfigId,
-            status: organization.status,
-            rowVersion: organization.rowVersion,
-            createdAt: organization.createdAt,
-            updatedAt: organization.updatedAt,
-          }
-        : null,
-    };
+    return this.tenantsService.findOne(id);
   }
 
   @ApiOperation({
@@ -135,22 +95,8 @@ export class TenantsController {
   })
   @Get(':id/organization')
   async getOrganization(@Param('id') id: string) {
-    const { organization } = await this.tenantsService.findOne(id);
-    return organization
-      ? {
-          id: organization.id,
-          tenantId: organization.tenantId,
-          legalName: organization.legalName,
-          tradeName: organization.tradeName,
-          cnpjDigits: organization.cnpjDigits,
-          taxProfile: organization.taxProfile,
-          regionalConfigId: organization.regionalConfigId,
-          status: organization.status,
-          rowVersion: organization.rowVersion,
-          createdAt: organization.createdAt,
-          updatedAt: organization.updatedAt,
-        }
-      : null;
+    const tenant = await this.tenantsService.findOne(id);
+    return tenant.organization;
   }
 
   @ApiOperation({

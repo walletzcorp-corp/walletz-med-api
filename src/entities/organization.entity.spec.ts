@@ -1,8 +1,8 @@
-import { Organization } from './organization.entity';
+import { OrganizationEntity } from './organization.entity';
 
 describe('Organization entity', () => {
   it('cria ativa com CNPJ válido', () => {
-    const org = Organization.create({
+    const org = OrganizationEntity.createIsValid({
       tenantId: 'tenant-1',
       legalName: 'Walletz Med LTDA',
       tradeName: 'Walletz Med',
@@ -17,7 +17,7 @@ describe('Organization entity', () => {
 
   it('rejeita CNPJ com menos de 14 dígitos', () => {
     expect(() =>
-      Organization.create({
+      OrganizationEntity.createIsValid({
         tenantId: 'tenant-1',
         legalName: 'X',
         tradeName: 'X',
@@ -29,7 +29,7 @@ describe('Organization entity', () => {
   });
 
   it('incrementa rowVersion a cada update', () => {
-    const org = Organization.create({
+    const org = OrganizationEntity.createIsValid({
       tenantId: 'tenant-1',
       legalName: 'Razão Social',
       tradeName: 'Nome Fantasia',
@@ -43,7 +43,7 @@ describe('Organization entity', () => {
   });
 
   it('lança conflito de versão se rowVersion divergir', () => {
-    const org = Organization.create({
+    const org = OrganizationEntity.createIsValid({
       tenantId: 'tenant-1',
       legalName: 'X',
       tradeName: 'X',
@@ -51,6 +51,8 @@ describe('Organization entity', () => {
       taxProfile: 'MEI',
       regionalConfigId: 'region-1',
     });
-    expect(() => org.update({ legalName: 'Y' }, 99)).toThrow('Conflito de versão');
+    expect(() => org.update({ legalName: 'Y' }, 99)).toThrow(
+      'Conflito de versão',
+    );
   });
 });

@@ -9,10 +9,14 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "dev": "nest start --watch",
-    "start:prod": "node dist/main.js",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node out/src/main.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:setup": "docker compose up -d --wait && prisma migrate deploy && prisma db seed",
     "db:update": "prisma migrate dev",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
@@ -47,6 +51,9 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seeds/seed.ts"
+  },
   "jest": {
     "moduleFileExtensions": [
       "js",
@@ -59,5 +66,11 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "testEnvironment": "node"
+  },
+  "allowScripts": {
+    "prisma@6.19.3": true,
+    "@prisma/engines@6.19.3": true,
+    "@prisma/client@6.19.3": true,
+    "@scarf/scarf": false
   }
 }

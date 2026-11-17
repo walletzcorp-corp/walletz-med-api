@@ -6,9 +6,10 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ES2023",
+    "target": "ES2022",
+    "moduleResolution": "node",
     "sourceMap": true,
-    "outDir": "./dist",
+    "outDir": "out",
     "baseUrl": "./",
     "rootDir": "./",
     "incremental": true,
@@ -17,7 +18,8 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "types": ["node", "jest"]
   },
   "watchOptions": {
     "watchFile": "priorityPollingInterval",

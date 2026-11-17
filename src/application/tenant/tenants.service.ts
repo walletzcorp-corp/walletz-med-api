@@ -5,8 +5,8 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Tenant } from '../../entities/tenant.entity';
-import { Organization } from '../../entities/organization.entity';
+import { TenantEntity } from '../../entities/tenant.entity';
+import { OrganizationEntity } from '../../entities/organization.entity';
 import {
   CreateTenantDto,
   UpdateOrganizationDto,
@@ -15,52 +15,64 @@ import {
 
 @Injectable()
 export class TenantsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async create(dto: CreateTenantDto) {
-    const tenant = Tenant.create();
-    const organization = Organization.create({ tenantId: tenant.id, ...dto });
+    await this.assertRegionalConfigAvailable(dto.regionalConfigId);
 
-    const tenantRow = {
-      id: tenant.id,
-      key: tenant.key,
-      status: tenant.status,
-      createdAt: tenant.createdAt,
-    };
+    const tenant = TenantEntity.create();
 
-    const orgRow = {
-      id: organization.id,
-      tenantId: organization.tenantId,
-      legalName: organization.legalName,
-      tradeName: organization.tradeName,
-      cnpjDigits: organization.cnpjDigits,
-      taxProfile: organization.taxProfile,
-      regionalConfigId: organization.regionalConfigId,
-      status: organization.status,
-      rowVersion: organization.rowVersion,
-      createdAt: organization.createdAt,
-      updatedAt: organization.updatedAt,
-    };
+    const organization = OrganizationEntity.createIsValid({
+      tenantId: tenant.id,
+      legalName: dto.legalName,
+      tradeName: dto.tradeName,
+      cnpjDigits: dto.cnpjDigits,
+      taxProfile: dto.taxProfile,
+      regionalConfigId: dto.regionalConfigId,
+    });
 
     await this.prisma.$transaction([
-      this.prisma.tenant.create({ data: tenantRow }),
-      this.prisma.organization.create({ data: orgRow }),
+      this.prisma.tenant.create({
+        data: {
+          id: tenant.id,
+          key: tenant.key,
+          status: tenant.status,
+          createdAt: tenant.createdAt,
+        },
+      }),
+      this.prisma.organization.create({
+        data: {
+          id: organization.id,
+          tenantId: organization.tenantId,
+          legalName: organization.legalName,
+          tradeName: organization.tradeName,
+          cnpjDigits: organization.cnpjDigits,
+          taxProfile: organization.taxProfile,
+          regionalConfigId: organization.regionalConfigId,
+          status: organization.status,
+          rowVersion: organization.rowVersion,
+          createdAt: organization.createdAt,
+          updatedAt: organization.updatedAt,
+        }
+      }),
     ]);
 
-    return { tenant, organization };
+    tenant.organization = organization;
+    return tenant;
   }
 
   async findAll() {
     const rows = await this.prisma.tenant.findMany({
       orderBy: { createdAt: 'desc' },
+      include: { organization: true },
     });
-    return rows.map((row) =>
-      Tenant.restore(row.id, {
-        key: row.key,
-        status: row.status as any,
-        createdAt: row.createdAt,
-      }),
-    );
+
+    return rows.map((row) => ({
+      tenant: TenantEntity.restore(row),
+      organization: row.organization
+        ? OrganizationEntity.restore(row.organization)
+        : null,
+    }));
   }
 
   async findOne(id: string) {
@@ -71,39 +83,22 @@ export class TenantsService {
 
     if (!row) throw new NotFoundException('Tenant não encontrado.');
 
-    const tenant = Tenant.restore(row.id, {
-      key: row.key,
-      status: row.status as any,
-      createdAt: row.createdAt,
+    return TenantEntity.restore(row);
+  }
+
+  async getOrganization() {
+    const row = await this.prisma.organization.findMany({
+      orderBy: { createdAt: 'desc' },
     });
 
-    const organization = row.organization
-      ? Organization.restore(row.organization.id, {
-          tenantId: row.organization.tenantId,
-          legalName: row.organization.legalName,
-          tradeName: row.organization.tradeName,
-          cnpjDigits: row.organization.cnpjDigits,
-          taxProfile: row.organization.taxProfile as any,
-          regionalConfigId: row.organization.regionalConfigId,
-          status: row.organization.status as any,
-          rowVersion: row.organization.rowVersion,
-          createdAt: row.organization.createdAt,
-          updatedAt: row.organization.updatedAt,
-        })
-      : null;
-
-    return { tenant, organization };
+    return row.map((row) => OrganizationEntity.restore(row));
   }
 
   async updateStatus(id: string, dto: UpdateTenantStatusDto) {
     const row = await this.prisma.tenant.findUnique({ where: { id } });
     if (!row) throw new NotFoundException('Tenant não encontrado.');
 
-    const tenant = Tenant.restore(row.id, {
-      key: row.key,
-      status: row.status as any,
-      createdAt: row.createdAt,
-    });
+    const tenant = TenantEntity.restore(row);
 
     switch (dto.status) {
       case 'ACTIVE':
@@ -131,23 +126,16 @@ export class TenantsService {
       where: { tenantId },
     });
 
+    if (fields.regionalConfigId) {
+      await this.assertRegionalConfigAvailable(fields.regionalConfigId);
+    }
+
     if (!orgRow)
       throw new NotFoundException(
         'Organização não encontrada para este tenant.',
       );
 
-    const organization = Organization.restore(orgRow.id, {
-      tenantId: orgRow.tenantId,
-      legalName: orgRow.legalName,
-      tradeName: orgRow.tradeName,
-      cnpjDigits: orgRow.cnpjDigits,
-      taxProfile: orgRow.taxProfile as any,
-      regionalConfigId: orgRow.regionalConfigId,
-      status: orgRow.status as any,
-      rowVersion: orgRow.rowVersion,
-      createdAt: orgRow.createdAt,
-      updatedAt: orgRow.updatedAt,
-    });
+    const organization = OrganizationEntity.restore(orgRow);
 
     try {
       organization.update(fields, rowVersion);
@@ -160,15 +148,19 @@ export class TenantsService {
 
     await this.prisma.organization.update({
       where: { id: organization.id },
-      data: {
-        legalName: organization.legalName,
-        tradeName: organization.tradeName,
-        cnpjDigits: organization.cnpjDigits,
-        taxProfile: organization.taxProfile,
-        regionalConfigId: organization.regionalConfigId,
-        rowVersion: organization.rowVersion,
-        updatedAt: organization.updatedAt,
-      },
+      data: organization,
     });
+  }
+
+  private async assertRegionalConfigAvailable(id: string) {
+    const config = await this.prisma.regionalConfiguration.findUnique({
+      where: { id },
+    });
+
+    if (!config || !config.active) {
+      throw new BadRequestException(
+        'Configuração regional invalida ou indísponivel',
+      );
+    }
   }
 }
