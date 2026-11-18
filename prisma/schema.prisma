@@ -136,3 +136,16 @@ model Unit {
 
 //-----------------------------------------
 
+model Audit {
+  eventId String @id @default((uuid)) @map("event_id")
+  tenantId String @map("tenant_id")
+  unitId String
+  actor String?
+  action String
+  object String
+  result String 
+  occurredAt DateTime @default((now)) @map("occurred_at")
+  correlationId String 
+
+  @@map(AuditEvent)
+}

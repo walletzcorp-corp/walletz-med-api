@@ -27,7 +27,7 @@ let OrganizationService = class OrganizationService {
             }),
             this.prisma.organization.count(),
         ]);
-        return {
+        var result = {
             data: items.map((item) => organization_entity_1.OrganizationEntity.restore(item)),
             meta: {
                 page,
@@ -36,6 +36,7 @@ let OrganizationService = class OrganizationService {
                 totalPages: Math.ceil(total / limit),
             },
         };
+        return result;
     }
 };
 exports.OrganizationService = OrganizationService;

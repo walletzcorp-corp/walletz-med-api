@@ -18,7 +18,10 @@ let AuditMiddleware = class AuditMiddleware {
         this.prisma = prisma;
     }
     async use(req, resp, next) {
-        let request = req;
+        const ip = req.ip ?? req.socket.remoteAddress;
+        const method = req.method;
+        const body = req.body;
+        next();
     }
 };
 exports.AuditMiddleware = AuditMiddleware;
