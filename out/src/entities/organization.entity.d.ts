@@ -1,5 +1,5 @@
 import { UnitEntity } from './unit.entity';
-export type OrgStatus = 'ACTIVE' | 'INACTIVE';
+export type OrgStatus = 'ACTIVE' | 'INACTIVE' | 'DRAFT' | 'CLOSED';
 export type TaxProfile = 'SIMPLES_NACIONAL' | 'LUCRO_PRESUMIDO' | 'LUCRO_REAL' | 'MEI';
 export declare class OrganizationEntity {
     readonly id: string;
@@ -16,7 +16,7 @@ export declare class OrganizationEntity {
     Unit?: UnitEntity[] | null;
     private constructor();
     static createIsValid(input: Pick<OrganizationEntity, 'tenantId' | 'legalName' | 'tradeName' | 'cnpjDigits' | 'taxProfile' | 'regionalConfigId'>): OrganizationEntity;
-    static restore(data: Omit<OrganizationEntity, 'update' | 'deactivate'>): OrganizationEntity;
+    static restore(data: any): OrganizationEntity;
     update(fields: Partial<Pick<OrganizationEntity, 'legalName' | 'tradeName' | 'cnpjDigits' | 'taxProfile' | 'regionalConfigId'>>, expectedVersion: number): void;
     deactivate(): void;
     private static assertCnpj;

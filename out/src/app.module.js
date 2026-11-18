@@ -13,7 +13,12 @@ const prisma_module_1 = require("./prisma/prisma.module");
 const tenants_module_1 = require("./application/tenant/tenants.module");
 const unit_module_1 = require("./application/unit/unit.module");
 const organization_module_1 = require("./application/organization/organization.module");
+const audit_middleware_1 = require("./infra/middlewares/audit.middleware");
+const organization_controller_1 = require("./apresentation/controllers/organization.controller");
 let AppModule = class AppModule {
+    configure(consumer) {
+        consumer.apply(audit_middleware_1.AuditMiddleware).forRoutes(organization_controller_1.OrganizationController);
+    }
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([

@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { InvalidOrganizationError } from '../common/errors/organization.errors';
 import { UnitEntity } from './unit.entity';
 
-export type OrgStatus = 'ACTIVE' | 'INACTIVE';
+export type OrgStatus = 'ACTIVE' | 'INACTIVE' | 'DRAFT' | 'CLOSED';
 
 export type TaxProfile =
   'SIMPLES_NACIONAL' | 'LUCRO_PRESUMIDO' | 'LUCRO_REAL' | 'MEI';
@@ -65,9 +65,7 @@ export class OrganizationEntity {
   }
 
   /* Reidrata a entidade a partir do registro do banco. */
-  static restore(
-    data: Omit<OrganizationEntity, 'update' | 'deactivate'>,
-  ): OrganizationEntity {
+  static restore(data: any): OrganizationEntity {
     return new OrganizationEntity(data);
   }
 

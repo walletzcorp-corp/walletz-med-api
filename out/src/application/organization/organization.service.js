@@ -19,7 +19,7 @@ let OrganizationService = class OrganizationService {
         this.prisma = prisma;
     }
     async getOrganization({ page, limit, }) {
-        const [rows, total] = await this.prisma.$transaction([
+        const [items, total] = await this.prisma.$transaction([
             this.prisma.organization.findMany({
                 orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
                 skip: (page - 1) * limit,
@@ -28,7 +28,7 @@ let OrganizationService = class OrganizationService {
             this.prisma.organization.count(),
         ]);
         return {
-            data: rows.map((row) => organization_entity_1.OrganizationEntity.restore(row)),
+            data: items.map((item) => organization_entity_1.OrganizationEntity.restore(item)),
             meta: {
                 page,
                 limit,

@@ -14,7 +14,7 @@ export class OrganizationService {
     page,
     limit,
   }: PaginationQueryDto): Promise<PaginatedResult<OrganizationEntity>> {
-    const [rows, total] = await this.prisma.$transaction([
+    const [items, total] = await this.prisma.$transaction([
       this.prisma.organization.findMany({
         orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
         skip: (page - 1) * limit,
@@ -24,7 +24,7 @@ export class OrganizationService {
     ]);
 
     return {
-      data: rows.map((row) => OrganizationEntity.restore(row)),
+      data: items.map((item) => OrganizationEntity.restore(item)),
       meta: {
         page,
         limit,

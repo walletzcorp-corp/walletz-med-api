@@ -22,6 +22,8 @@ enum TenantStatus {
 enum OrgStatus {
   ACTIVE
   INACTIVE
+  DRAFT
+  CLOSED
 }
 
 enum TaxProfile {
