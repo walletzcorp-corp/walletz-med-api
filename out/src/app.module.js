@@ -15,6 +15,7 @@ const unit_module_1 = require("./application/unit/unit.module");
 const organization_module_1 = require("./application/organization/organization.module");
 const audit_middleware_1 = require("./infra/middlewares/audit.middleware");
 const organization_controller_1 = require("./apresentation/controllers/organization.controller");
+const audit_module_1 = require("./application/audit/audit.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(audit_middleware_1.AuditMiddleware).forRoutes(organization_controller_1.OrganizationController);
@@ -29,6 +30,7 @@ exports.AppModule = AppModule = __decorate([
             tenants_module_1.TenantsModule,
             unit_module_1.UnitModule,
             organization_module_1.OrganizationModule,
+            audit_module_1.AuditModule,
         ],
     })
 ], AppModule);

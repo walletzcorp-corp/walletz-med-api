@@ -2,9 +2,11 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { TenantEntity } from '../../entities/tenant.entity';
 import { OrganizationEntity } from '../../entities/organization.entity';
 import { CreateTenantDto, UpdateOrganizationDto, UpdateTenantStatusDto } from '../../apresentation/dto/tenant.dto';
+import { AuditService } from '../audit/audit.service';
 export declare class TenantsService {
     private readonly prisma;
-    constructor(prisma: PrismaService);
+    private readonly audit;
+    constructor(prisma: PrismaService, audit: AuditService);
     create(dto: CreateTenantDto): Promise<TenantEntity>;
     findAll(): Promise<{
         tenant: TenantEntity;

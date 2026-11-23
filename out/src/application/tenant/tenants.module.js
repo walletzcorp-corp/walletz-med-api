@@ -12,11 +12,13 @@ const tenants_controller_1 = require("../../apresentation/controllers/tenants.co
 const tenants_service_1 = require("./tenants.service");
 const regional_configuration_controller_1 = require("../../apresentation/controllers/regional-configuration.controller");
 const regional_configuration_service_1 = require("../regional.configuration/regional.configuration.service");
+const audit_module_1 = require("../audit/audit.module");
 let TenantsModule = class TenantsModule {
 };
 exports.TenantsModule = TenantsModule;
 exports.TenantsModule = TenantsModule = __decorate([
     (0, common_1.Module)({
+        imports: [audit_module_1.AuditModule],
         controllers: [tenants_controller_1.TenantsController, regional_configuration_controller_1.RegionalConfigurationController],
         providers: [tenants_service_1.TenantsService, regional_configuration_service_1.RegionalConfigurationService],
     })

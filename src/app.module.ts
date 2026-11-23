@@ -7,6 +7,7 @@ import { OrganizationModule } from './application/organization/organization.modu
 import { audit } from 'rxjs';
 import { AuditMiddleware } from './infra/middlewares/audit.middleware';
 import { OrganizationController } from './apresentation/controllers/organization.controller';
+import { AuditModule } from './application/audit/audit.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { OrganizationController } from './apresentation/controllers/organization
     TenantsModule,
     UnitModule,
     OrganizationModule,
+    AuditModule,
   ],
 })
 export class AppModule {

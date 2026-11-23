@@ -14,10 +14,13 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const tenant_entity_1 = require("../../entities/tenant.entity");
 const organization_entity_1 = require("../../entities/organization.entity");
+const audit_service_1 = require("../audit/audit.service");
 let TenantsService = class TenantsService {
     prisma;
-    constructor(prisma) {
+    audit;
+    constructor(prisma, audit) {
         this.prisma = prisma;
+        this.audit = audit;
     }
     async create(dto) {
         await this.assertRegionalConfigAvailable(dto.regionalConfigId);
@@ -29,6 +32,11 @@ let TenantsService = class TenantsService {
             cnpjDigits: dto.cnpjDigits,
             taxProfile: dto.taxProfile,
             regionalConfigId: dto.regionalConfigId,
+        });
+        const eventId = await this.audit.create({
+            tenantId: organization.tenantId,
+            action: 'CREATE_TENANT',
+            object: `Tenant:${tenant.id}`,
         });
         await this.prisma.$transaction([
             this.prisma.tenant.create({
@@ -52,7 +60,7 @@ let TenantsService = class TenantsService {
                     rowVersion: organization.rowVersion,
                     createdAt: organization.createdAt,
                     updatedAt: organization.updatedAt,
-                }
+                },
             }),
         ]);
         tenant.organization = organization;
@@ -145,6 +153,7 @@ let TenantsService = class TenantsService {
 exports.TenantsService = TenantsService;
 exports.TenantsService = TenantsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        audit_service_1.AuditService])
 ], TenantsService);
 //# sourceMappingURL=tenants.service.js.map

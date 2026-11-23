@@ -12,10 +12,14 @@ import {
   UpdateOrganizationDto,
   UpdateTenantStatusDto,
 } from '../../apresentation/dto/tenant.dto';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class TenantsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditService,
+  ) {}
 
   async create(dto: CreateTenantDto) {
     await this.assertRegionalConfigAvailable(dto.regionalConfigId);
@@ -29,6 +33,13 @@ export class TenantsService {
       cnpjDigits: dto.cnpjDigits,
       taxProfile: dto.taxProfile,
       regionalConfigId: dto.regionalConfigId,
+    });
+
+    //INICIO DE AUDITORIA
+    const eventId = await this.audit.create({
+      tenantId: organization.tenantId,
+      action: 'CREATE_TENANT',
+      object: `Tenant:${tenant.id}`,
     });
 
     await this.prisma.$transaction([
@@ -53,7 +64,7 @@ export class TenantsService {
           rowVersion: organization.rowVersion,
           createdAt: organization.createdAt,
           updatedAt: organization.updatedAt,
-        }
+        },
       }),
     ]);
 
