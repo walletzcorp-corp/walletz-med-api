@@ -13,10 +13,14 @@ import {
 } from 'src/apresentation/dto/unit.dto';
 import { UnitEntity } from 'src/entities/unit.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class UnitService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditService,
+  ) {}
 
   async create(organizationId: string, dto: CreateUnitDto) {
     //verificando se a organização esta diferente de ativa
@@ -46,6 +50,13 @@ export class UnitService {
         municipality: dto.municipality,
         uf: dto.uf,
         timezone: dto.timezone,
+      });
+
+      //INICIO DE AUDITORIA
+      const eventId = await this.audit.create({
+        tenantId: org.tenantId,
+        action: 'CREATE_UNIT',
+        object: `Unit:${unit.id}`,
       });
 
       return tx.unit.create({

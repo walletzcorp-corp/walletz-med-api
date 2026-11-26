@@ -16,5 +16,5 @@ export declare class TenantsService {
     getOrganization(): Promise<OrganizationEntity[]>;
     updateStatus(id: string, dto: UpdateTenantStatusDto): Promise<void>;
     updateOrganization(tenantId: string, dto: UpdateOrganizationDto): Promise<void>;
-    private assertRegionalConfigAvailable;
+    private VerificarSeRegionalConfiExiste;
 }

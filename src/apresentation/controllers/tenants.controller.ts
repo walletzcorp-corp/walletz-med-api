@@ -20,6 +20,7 @@ import {
 export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 
+  //requisição vinda do front
   @Post()
   @ApiOperation({
     summary: 'Criar um novo Tenant',
@@ -30,6 +31,7 @@ export class TenantsController {
     status: 201,
     description: 'Tenant e Organização criados com sucesso.',
   })
+  //requisição do front exige receber um dto
   async create(@Body() dto: CreateTenantDto) {
     return this.tenantsService.create(dto);
   }

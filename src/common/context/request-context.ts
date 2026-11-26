@@ -29,8 +29,8 @@ export function requestContextMiddleware(
   storage.run(
     {
       correlationId,
-      // PROVISÓRIO: sem autenticação, ator e papel vêm de cabeçalho.
-      // Trocar pela identidade validada quando o S1-ENAB-002 existir.
+      // PROVISÓRIO: sem autenticação, ator e papel vêm de cabeçalho
+      // Trocar pela identidade validada quando existir
       actorId: header(req, 'x-actor-id', 'anonymous'),
       role: header(req, 'x-actor-role', 'unknown'),
       origin: `${req.method} ${req.path}`,

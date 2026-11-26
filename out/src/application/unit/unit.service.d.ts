@@ -1,9 +1,11 @@
 import { BlockUnitDto, CreateUnitDto, UpdateUnitDto } from "../../apresentation/dto/unit.dto";
 import { UnitEntity } from "../../entities/unit.entity";
 import { PrismaService } from "../../prisma/prisma.service";
+import { AuditService } from '../audit/audit.service';
 export declare class UnitService {
     private readonly prisma;
-    constructor(prisma: PrismaService);
+    private readonly audit;
+    constructor(prisma: PrismaService, audit: AuditService);
     create(organizationId: string, dto: CreateUnitDto): Promise<UnitEntity>;
     private gerenateNextUnitCode;
     private getUnitOrThrow;

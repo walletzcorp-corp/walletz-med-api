@@ -22,10 +22,14 @@ export class TenantsService {
   ) {}
 
   async create(dto: CreateTenantDto) {
-    await this.assertRegionalConfigAvailable(dto.regionalConfigId);
+    //metodo apenas verifica se esta valido o reginalConfig, baseado no id recebido
+    await this.VerificarSeRegionalConfiExiste(dto.regionalConfigId);
+    // se esta ok, segue
 
     const tenant = TenantEntity.create();
+    //tenant recebe o que o metodo create faz
 
+    //essa const recebe a função e o retorno da nova organização
     const organization = OrganizationEntity.createIsValid({
       tenantId: tenant.id,
       legalName: dto.legalName,
@@ -42,6 +46,8 @@ export class TenantsService {
       object: `Tenant:${tenant.id}`,
     });
 
+    // transaction faz funçoes conjuntas, se uma falhar, todo o resto é desfeito
+    //nesse caso esta salvando no banco de dados
     await this.prisma.$transaction([
       this.prisma.tenant.create({
         data: {
@@ -68,7 +74,10 @@ export class TenantsService {
       }),
     ]);
 
+    //colocamos a organização criada na propriedade organização do tenant
     tenant.organization = organization;
+
+    // retorna o tenant requerido ao controller q retornara a requisição
     return tenant;
   }
 
@@ -138,7 +147,7 @@ export class TenantsService {
     });
 
     if (fields.regionalConfigId) {
-      await this.assertRegionalConfigAvailable(fields.regionalConfigId);
+      await this.VerificarSeRegionalConfiExiste(fields.regionalConfigId);
     }
 
     if (!orgRow)
@@ -163,12 +172,14 @@ export class TenantsService {
     });
   }
 
-  private async assertRegionalConfigAvailable(id: string) {
-    const config = await this.prisma.regionalConfiguration.findUnique({
-      where: { id },
-    });
+  private async VerificarSeRegionalConfiExiste(id: string) {
+    //metodo recebe um id, e verifica se está valido o regionalConfig, se esta ok, segue
+    const entityRegionalConfig =
+      await this.prisma.regionalConfiguration.findUnique({
+        where: { id },
+      });
 
-    if (!config || !config.active) {
+    if (!entityRegionalConfig || !entityRegionalConfig.active) {
       throw new BadRequestException(
         'Configuração regional invalida ou indísponivel',
       );

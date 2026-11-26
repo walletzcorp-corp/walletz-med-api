@@ -11,9 +11,10 @@ export class OrganizationService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getOrganization({
-    page,
+    page, //parametros
     limit,
-  }: PaginationQueryDto): Promise<PaginatedResult<OrganizationEntity>> {
+  }: //deve retornar PaginaQueryDto
+  PaginationQueryDto): Promise<PaginatedResult<OrganizationEntity>> {
     const [items, total] = await this.prisma.$transaction([
       this.prisma.organization.findMany({
         orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],

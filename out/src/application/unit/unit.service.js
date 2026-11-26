@@ -13,10 +13,13 @@ exports.UnitService = void 0;
 const common_1 = require("@nestjs/common");
 const unit_entity_1 = require("../../entities/unit.entity");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const audit_service_1 = require("../audit/audit.service");
 let UnitService = class UnitService {
     prisma;
-    constructor(prisma) {
+    audit;
+    constructor(prisma, audit) {
         this.prisma = prisma;
+        this.audit = audit;
     }
     async create(organizationId, dto) {
         const org = await this.prisma.organization.findUnique({
@@ -38,6 +41,11 @@ let UnitService = class UnitService {
                 municipality: dto.municipality,
                 uf: dto.uf,
                 timezone: dto.timezone,
+            });
+            const eventId = await this.audit.create({
+                tenantId: org.tenantId,
+                action: 'CREATE_UNIT',
+                object: `Unit:${unit.id}`,
             });
             return tx.unit.create({
                 data: {
@@ -162,6 +170,7 @@ let UnitService = class UnitService {
 exports.UnitService = UnitService;
 exports.UnitService = UnitService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        audit_service_1.AuditService])
 ], UnitService);
 //# sourceMappingURL=unit.service.js.map

@@ -23,7 +23,7 @@ let TenantsService = class TenantsService {
         this.audit = audit;
     }
     async create(dto) {
-        await this.assertRegionalConfigAvailable(dto.regionalConfigId);
+        await this.VerificarSeRegionalConfiExiste(dto.regionalConfigId);
         const tenant = tenant_entity_1.TenantEntity.create();
         const organization = organization_entity_1.OrganizationEntity.createIsValid({
             tenantId: tenant.id,
@@ -122,7 +122,7 @@ let TenantsService = class TenantsService {
             where: { tenantId },
         });
         if (fields.regionalConfigId) {
-            await this.assertRegionalConfigAvailable(fields.regionalConfigId);
+            await this.VerificarSeRegionalConfiExiste(fields.regionalConfigId);
         }
         if (!orgRow)
             throw new common_1.NotFoundException('Organização não encontrada para este tenant.');
@@ -141,11 +141,11 @@ let TenantsService = class TenantsService {
             data: organization,
         });
     }
-    async assertRegionalConfigAvailable(id) {
-        const config = await this.prisma.regionalConfiguration.findUnique({
+    async VerificarSeRegionalConfiExiste(id) {
+        const entityRegionalConfig = await this.prisma.regionalConfiguration.findUnique({
             where: { id },
         });
-        if (!config || !config.active) {
+        if (!entityRegionalConfig || !entityRegionalConfig.active) {
             throw new common_1.BadRequestException('Configuração regional invalida ou indísponivel');
         }
     }

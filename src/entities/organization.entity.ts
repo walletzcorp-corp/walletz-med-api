@@ -39,22 +39,28 @@ export class OrganizationEntity {
     this.Unit = data.Unit ?? null;
   }
 
+  //metodo
   static createIsValid(
     input: Pick<
       OrganizationEntity,
-      | 'tenantId'
+      | 'tenantId' //parametros
       | 'legalName'
       | 'tradeName'
       | 'cnpjDigits'
       | 'taxProfile'
       | 'regionalConfigId'
     >,
+    //o que ele deve retornar
   ): OrganizationEntity {
+    //metodos assertCnpj e AssertNonEmpty valida se os campos nao sao nulos/vazios
     OrganizationEntity.assertCnpj(input.cnpjDigits);
     OrganizationEntity.assertNonEmpty(input.legalName, 'Razão social');
     OrganizationEntity.assertNonEmpty(input.tradeName, 'Nome fantasia');
     const now = new Date();
+
+    //retorna e istancia a nova organização
     return new OrganizationEntity({
+      //colocando os dados das propriedades
       ...input,
       id: randomUUID(),
       status: 'ACTIVE',
