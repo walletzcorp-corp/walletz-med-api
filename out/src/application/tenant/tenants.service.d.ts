@@ -3,10 +3,12 @@ import { TenantEntity } from '../../entities/tenant.entity';
 import { OrganizationEntity } from '../../entities/organization.entity';
 import { CreateTenantDto, UpdateOrganizationDto, UpdateTenantStatusDto } from '../../apresentation/dto/tenant.dto';
 import { AuditService } from '../audit/audit.service';
+import { HttpClient } from '@nestjs/http-client';
 export declare class TenantsService {
     private readonly prisma;
     private readonly audit;
-    constructor(prisma: PrismaService, audit: AuditService);
+    private readonly http;
+    constructor(prisma: PrismaService, audit: AuditService, http: HttpClient);
     create(dto: CreateTenantDto): Promise<TenantEntity>;
     findAll(): Promise<{
         tenant: TenantEntity;
@@ -17,4 +19,5 @@ export declare class TenantsService {
     updateStatus(id: string, dto: UpdateTenantStatusDto): Promise<void>;
     updateOrganization(tenantId: string, dto: UpdateOrganizationDto): Promise<void>;
     private VerificarSeRegionalConfiExiste;
+    private ValidandoCNPJExistente;
 }

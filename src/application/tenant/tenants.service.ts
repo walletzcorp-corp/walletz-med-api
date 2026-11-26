@@ -13,15 +13,21 @@ import {
   UpdateTenantStatusDto,
 } from '../../apresentation/dto/tenant.dto';
 import { AuditService } from '../audit/audit.service';
+import { error } from 'console';
+import { HttpClient } from '@nestjs/http-client';
 
 @Injectable()
 export class TenantsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly http: HttpClient,
   ) {}
 
   async create(dto: CreateTenantDto) {
+    //chamando o metodo de validação, parametro sendo o cnpj vindo do dto(que vem da requisição)
+    await this.ValidandoCNPJExistente(dto.cnpjDigits);
+
     //metodo apenas verifica se esta valido o reginalConfig, baseado no id recebido
     await this.VerificarSeRegionalConfiExiste(dto.regionalConfigId);
     // se esta ok, segue
@@ -184,5 +190,15 @@ export class TenantsService {
         'Configuração regional invalida ou indísponivel',
       );
     }
+  }
+
+  private async ValidandoCNPJExistente(cnpj: string): Promise<any[]> {
+    //Fazer requisição GET neste endpoint: https://brasilapi.com.br/api/cnpj/v1/65621091000128
+
+    var route = '/' + cnpj;
+    const { data } = await this.http.get<any[]>(cnpj);
+    return data;
+
+    //para capturar o erro ou suscesso, analisar o status code!!!!!!!!!!
   }
 }

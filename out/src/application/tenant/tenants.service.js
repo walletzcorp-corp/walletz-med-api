@@ -15,14 +15,18 @@ const prisma_service_1 = require("../../prisma/prisma.service");
 const tenant_entity_1 = require("../../entities/tenant.entity");
 const organization_entity_1 = require("../../entities/organization.entity");
 const audit_service_1 = require("../audit/audit.service");
+const http_client_1 = require("@nestjs/http-client");
 let TenantsService = class TenantsService {
     prisma;
     audit;
-    constructor(prisma, audit) {
+    http;
+    constructor(prisma, audit, http) {
         this.prisma = prisma;
         this.audit = audit;
+        this.http = http;
     }
     async create(dto) {
+        await this.ValidandoCNPJExistente(dto.cnpjDigits);
         await this.VerificarSeRegionalConfiExiste(dto.regionalConfigId);
         const tenant = tenant_entity_1.TenantEntity.create();
         const organization = organization_entity_1.OrganizationEntity.createIsValid({
@@ -149,11 +153,17 @@ let TenantsService = class TenantsService {
             throw new common_1.BadRequestException('Configuração regional invalida ou indísponivel');
         }
     }
+    async ValidandoCNPJExistente(cnpj) {
+        var route = '/' + cnpj;
+        const { data } = await this.http.get(cnpj);
+        return data;
+    }
 };
 exports.TenantsService = TenantsService;
 exports.TenantsService = TenantsService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        audit_service_1.AuditService])
+        audit_service_1.AuditService,
+        http_client_1.HttpClient])
 ], TenantsService);
 //# sourceMappingURL=tenants.service.js.map
